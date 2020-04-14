@@ -11,12 +11,14 @@ def main():
     parser.add_argument(dest="transMemFile", help="input transmembrane file here")
     parser.add_argument(dest="stateSeq", help="input the state sequence file here")
     parser.add_argument(dest = "analysisSeq", help="input the sequence file to be analyzed here")
+    parser.add_argument(dest = "outFile", help= "input the output file name")
     args = parser.parse_args()
 
     solubleFile = open(args.solFile, "r")
     transMembraneFile = open(args.transMemFile, "r")
     stateFrequenciesFile = open(args.stateSeq, "r")
     analysisFile = open(args.analysisSeq, "r")
+    outfile = open(args.outFile, "w")
     global solubleFrequencies
     solubleFrequencies = {}
     global transMembraneFrequencies
@@ -148,6 +150,8 @@ def main():
     getStateFrequencies()
     def getStateSequence():
         startCode = analysisSequence[0:1]
+        outfile.write("Sequence to be analyzed :" + analysisSequence)
+        outfile.write("\n")
         x = 0
         while x<len(analysisSequence):
             transProb.append(0)
@@ -191,6 +195,20 @@ def main():
             b = b + 1
         transProbFinal = transProb[len(transProb)-1]
         solProbFinal = solProb[len(solProb)-1]
+        outfile.write("Scoring Matrix, top row is soluble, bottom is transmembrane:")
+        outfile.write("\n")
+        for line in scoresMatrix:
+            tempString = "[ "
+            for a in line:
+                tempString = tempString + str(a) + " "
+            tempString = tempString + "]"
+            outfile.write(tempString)
+        outfile.write("\n")
+        transProbFinal = numpy.exp(transProbFinal)
+        solProbFinal = numpy.exp(solProbFinal)
+        outfile.write("probability of the transmembrane path: " + str(transProbFinal))
+        outfile.write("\n")
+        outfile.write("probability of the soluble path: " + str(solProbFinal))
     getStateSequence()
     def getFinalState():
         numberOfElements = len(solProb)
@@ -204,6 +222,14 @@ def main():
             if(transTemp>solTemp):
                 finalState[0,z] = 'T'
             z = z-1
-        print(finalState)
+        outfile.write("\n")
+        outfile.write("Final state matrix showing the most probable state path: ")
+        outfile.write("\n")
+        for line in finalState:
+            tempstring = "["
+            for x in line:
+                tempstring = tempstring + x + " "
+            tempstring = tempstring + "]"
+            outfile.write(tempstring)
     getFinalState()
 main()
